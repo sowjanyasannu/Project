@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Heart, ShoppingBag, Menu } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -9,9 +8,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SearchBar } from "@/components/layout/search-bar";
+import { HeaderSearch } from "@/components/layout/header-search";
 import { AccountMenu } from "@/components/layout/account-menu";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 import type { Category } from "@/types/database";
+import type { CartLine } from "@/lib/cart";
 
 const shopLinks: { label: string; href: string }[] = [
   { label: "School Uniforms", href: "/shop/school-uniforms" },
@@ -33,11 +34,11 @@ const primaryNav: { label: string; href: string }[] = [
 
 export function Header({
   categories,
-  cartCount,
+  cart,
   isSignedIn,
 }: {
   categories: Category[];
-  cartCount: number;
+  cart: { lines: CartLine[]; subtotal: number; count: number };
   isSignedIn: boolean;
 }) {
   const links = categories.length
@@ -94,7 +95,7 @@ export function Header({
         </nav>
 
         <div className="ml-auto flex flex-1 items-center justify-end gap-1 sm:gap-2">
-          <SearchBar className="hidden w-full max-w-xs md:block" />
+          <HeaderSearch className="hidden w-full max-w-xs md:flex" />
           <Button
             variant="ghost"
             size="icon"
@@ -104,19 +105,12 @@ export function Header({
             <Heart className="size-5" />
           </Button>
           <AccountMenu isSignedIn={isSignedIn} />
-          <Button variant="ghost" size="icon" className="relative" render={<Link href="/cart" aria-label="Cart" />}>
-            <ShoppingBag className="size-5" />
-            {cartCount > 0 && (
-              <Badge className="absolute -right-1 -top-1 size-5 justify-center rounded-full bg-brand-red p-0 text-[10px]">
-                {cartCount}
-              </Badge>
-            )}
-          </Button>
+          <CartDrawer lines={cart.lines} subtotal={cart.subtotal} cartCount={cart.count} />
         </div>
       </div>
       <div className="border-t md:hidden">
         <div className="container-app py-2">
-          <SearchBar />
+          <HeaderSearch className="w-full" />
         </div>
       </div>
     </header>

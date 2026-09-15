@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, X } from "lucide-react";
@@ -8,6 +9,7 @@ import { formatINR } from "@/lib/format";
 import { removeCartItemAction, updateCartItemAction, type CartLine } from "@/lib/cart";
 
 export function CartLineItem({ line }: { line: CartLine }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -28,7 +30,12 @@ export function CartLineItem({ line }: { line: CartLine }) {
           <button
             aria-label="Remove item"
             disabled={pending}
-            onClick={() => startTransition(() => removeCartItemAction(line.id))}
+            onClick={() =>
+              startTransition(async () => {
+                await removeCartItemAction(line.id);
+                router.refresh();
+              })
+            }
             className="text-muted-foreground hover:text-destructive"
           >
             <X className="size-4" />
@@ -40,7 +47,12 @@ export function CartLineItem({ line }: { line: CartLine }) {
             <button
               className="p-1.5 disabled:opacity-40"
               disabled={pending}
-              onClick={() => startTransition(async () => { await updateCartItemAction(line.id, line.quantity - 1); })}
+              onClick={() =>
+                startTransition(async () => {
+                  await updateCartItemAction(line.id, line.quantity - 1);
+                  router.refresh();
+                })
+              }
               aria-label="Decrease quantity"
             >
               <Minus className="size-3.5" />
@@ -49,7 +61,12 @@ export function CartLineItem({ line }: { line: CartLine }) {
             <button
               className="p-1.5 disabled:opacity-40"
               disabled={pending || line.quantity >= line.variant.stock_available}
-              onClick={() => startTransition(async () => { await updateCartItemAction(line.id, line.quantity + 1); })}
+              onClick={() =>
+                startTransition(async () => {
+                  await updateCartItemAction(line.id, line.quantity + 1);
+                  router.refresh();
+                })
+              }
               aria-label="Increase quantity"
             >
               <Plus className="size-3.5" />

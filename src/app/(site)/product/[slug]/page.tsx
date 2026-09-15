@@ -7,6 +7,8 @@ import { VariantSelector } from "@/components/product/variant-selector";
 import { SizeChartDialog } from "@/components/product/size-chart-dialog";
 import { ProductTabs } from "@/components/product/product-tabs";
 import { ProductRail } from "@/components/home/product-rail";
+import { RecentlyViewedTracker } from "@/components/product/recently-viewed-tracker";
+import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { getProductBySlug, getRelatedProducts, getSizeChart } from "@/lib/data/catalog";
 import { getSiteSettings } from "@/lib/data/site";
 import { getWishlistProductIds } from "@/lib/wishlist";
@@ -61,6 +63,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="container-app py-8">
+      <RecentlyViewedTracker productId={product.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
@@ -109,6 +112,7 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="-mx-4 sm:-mx-6 lg:-mx-8">
         <ProductRail title="You may also like" products={related} wishlistedIds={wishlistedIds} />
+        <RecentlyViewed excludeProductId={product.id} />
       </div>
     </div>
   );

@@ -215,6 +215,19 @@ export async function getProductBySlug(slug: string): Promise<ProductWithRelatio
   };
 }
 
+export async function getProductsByIds(ids: string[]): Promise<ProductCardData[]> {
+  if (ids.length === 0) return [];
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("products")
+    .select("*, category:categories(*)")
+    .eq("is_active", true)
+    .in("id", ids);
+  const cards = await attachCardFields((data as (Product & { category: Category | null })[]) ?? []);
+  const byId = new Map(cards.map((c) => [c.id, c]));
+  return ids.map((id) => byId.get(id)).filter((c): c is ProductCardData => Boolean(c));
+}
+
 export async function getRelatedProducts(
   categoryId: string | null,
   excludeProductId: string,
