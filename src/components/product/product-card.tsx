@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { WishlistButton } from "@/components/product/wishlist-button";
+import { AddToCartButton } from "@/components/product/add-to-cart-button";
 import { formatINR } from "@/lib/format";
 import type { ProductCardData } from "@/lib/data/catalog";
 
@@ -81,6 +82,12 @@ export function ProductCard({
         {product.sizes.length > 0 && (
           <p className="text-[11px] text-muted-foreground">Sizes: {product.sizes.join(", ")}</p>
         )}
+
+        <AddToCartButton
+          variantId={product.defaultVariantId}
+          inStock={product.in_stock}
+          className="mt-2"
+        />
       </div>
     </div>
   );

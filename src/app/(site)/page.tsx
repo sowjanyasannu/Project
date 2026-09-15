@@ -4,24 +4,46 @@ import { ProductRail } from "@/components/home/product-rail";
 import { CustomUniformCTA } from "@/components/home/custom-cta";
 import { TrustElements } from "@/components/home/trust-elements";
 import { getSiteSettings, getTopCategories } from "@/lib/data/site";
-import { getBestSellers, getFeaturedProducts, getNewArrivals } from "@/lib/data/catalog";
+import { getBestSellers, getFeaturedProducts, getNewArrivals, getProducts } from "@/lib/data/catalog";
 import { getWishlistProductIds } from "@/lib/wishlist";
 
 export default async function HomePage() {
-  const [settings, categories, featured, bestSellers, newArrivals, wishlistedIds] = await Promise.all([
-    getSiteSettings(),
-    getTopCategories(),
-    getFeaturedProducts(),
-    getBestSellers(),
-    getNewArrivals(),
-    getWishlistProductIds(),
-  ]);
+  const [settings, categories, schoolUniforms, bestSellers, newArrivals, featured, wishlistedIds] =
+    await Promise.all([
+      getSiteSettings(),
+      getTopCategories(),
+      getProducts({ categorySlug: "school-uniforms", pageSize: 8 }),
+      getBestSellers(),
+      getNewArrivals(),
+      getFeaturedProducts(),
+      getWishlistProductIds(),
+    ]);
 
   return (
     <>
       <Hero settings={settings} />
-      <TrustElements />
       <CategoryGrid categories={categories} />
+      <ProductRail
+        title="Shop School Uniforms"
+        subtitle="Shirts, trousers, skirts, tracksuits and complete uniform sets."
+        products={schoolUniforms.products}
+        viewAllHref="/shop/school-uniforms"
+        wishlistedIds={wishlistedIds}
+      />
+      <ProductRail
+        title="Best Sellers"
+        subtitle="Most-loved styles across schools, teams and companies."
+        products={bestSellers}
+        viewAllHref="/shop?sort=best_selling"
+        wishlistedIds={wishlistedIds}
+      />
+      <CustomUniformCTA />
+      <ProductRail
+        title="New Arrivals"
+        products={newArrivals}
+        viewAllHref="/shop?sort=newest"
+        wishlistedIds={wishlistedIds}
+      />
       <ProductRail
         title="Featured Products"
         subtitle="Hand-picked from our uniform and sportswear range."
@@ -29,19 +51,7 @@ export default async function HomePage() {
         viewAllHref="/shop"
         wishlistedIds={wishlistedIds}
       />
-      <CustomUniformCTA />
-      <ProductRail
-        title="Best Sellers"
-        products={bestSellers}
-        viewAllHref="/shop?sort=best_selling"
-        wishlistedIds={wishlistedIds}
-      />
-      <ProductRail
-        title="New Arrivals"
-        products={newArrivals}
-        viewAllHref="/shop?sort=newest"
-        wishlistedIds={wishlistedIds}
-      />
+      <TrustElements />
     </>
   );
 }

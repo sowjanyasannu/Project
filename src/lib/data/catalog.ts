@@ -17,6 +17,7 @@ export interface ProductCardData extends Product {
   in_stock: boolean;
   rating: number;
   review_count: number;
+  defaultVariantId: string | null;
 }
 
 async function attachCardFields(products: (Product & { category: Category | null })[]) {
@@ -32,7 +33,7 @@ async function attachCardFields(products: (Product & { category: Category | null
       .order("display_order", { ascending: true }),
     supabase
       .from("product_variants")
-      .select("product_id, size, colour, stock_available, is_active")
+      .select("id, product_id, size, colour, stock_available, is_active")
       .in("product_id", ids),
     supabase.from("reviews").select("product_id, rating").in("product_id", ids).eq("is_approved", true),
   ]);
@@ -61,6 +62,7 @@ async function attachCardFields(products: (Product & { category: Category | null
     const variantList = variantsByProduct.get(p.id) ?? [];
     const activeVariants = variantList.filter((v) => v.is_active);
     const rating = ratingByProduct.get(p.id);
+    const inStockVariant = activeVariants.find((v) => v.stock_available > 0) ?? null;
     return {
       ...p,
       image: imageByProduct.get(p.id) ?? null,
@@ -70,6 +72,7 @@ async function attachCardFields(products: (Product & { category: Category | null
       in_stock: activeVariants.some((v) => v.stock_available > 0),
       rating: rating ? Math.round((rating.sum / rating.count) * 10) / 10 : 0,
       review_count: rating?.count ?? 0,
+      defaultVariantId: inStockVariant?.id ?? null,
     };
   });
 }

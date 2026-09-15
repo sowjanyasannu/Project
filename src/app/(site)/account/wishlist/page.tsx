@@ -24,7 +24,7 @@ export default async function WishlistPage() {
       ? supabase.from("product_images").select("product_id, url").in("product_id", productIds).order("display_order")
       : Promise.resolve({ data: [] }),
     productIds.length
-      ? supabase.from("product_variants").select("product_id, size, colour, stock_available, is_active").in("product_id", productIds)
+      ? supabase.from("product_variants").select("id, product_id, size, colour, stock_available, is_active").in("product_id", productIds)
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -40,6 +40,7 @@ export default async function WishlistPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {products.map((product) => {
             const productVariants = (variants ?? []).filter((v) => v.product_id === product.id && v.is_active);
+            const inStockVariant = productVariants.find((v) => v.stock_available > 0) ?? null;
             return (
               <ProductCard
                 key={product.id}
@@ -53,6 +54,7 @@ export default async function WishlistPage() {
                   in_stock: productVariants.some((v) => v.stock_available > 0),
                   rating: 0,
                   review_count: 0,
+                  defaultVariantId: inStockVariant?.id ?? null,
                 }}
               />
             );
