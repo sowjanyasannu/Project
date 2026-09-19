@@ -3,9 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { ProductImage } from "@/types/database";
 
-export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
+export function ProductGallery({ images, productName }: { images: string[]; productName: string }) {
   const [active, setActive] = useState(0);
   const shown = images.length > 0 ? images : null;
 
@@ -14,8 +13,8 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted">
         {shown ? (
           <Image
-            src={shown[active].url}
-            alt={shown[active].alt_text ?? productName}
+            src={shown[active]}
+            alt={productName}
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 45vw"
@@ -29,16 +28,16 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
       </div>
       {shown && shown.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto">
-          {shown.map((img, i) => (
+          {shown.map((url, i) => (
             <button
-              key={img.id}
+              key={url}
               onClick={() => setActive(i)}
               className={cn(
                 "relative size-16 shrink-0 overflow-hidden rounded-md border-2",
                 i === active ? "border-brand-navy" : "border-transparent"
               )}
             >
-              <Image src={img.url} alt="" fill sizes="64px" className="object-cover" />
+              <Image src={url} alt="" fill sizes="64px" className="object-cover" />
             </button>
           ))}
         </div>

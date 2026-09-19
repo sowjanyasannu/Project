@@ -10,11 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SizeChart, SizeChartEntry } from "@/types/database";
+import type { SizeChart } from "@/types/database";
 
-export function SizeChartDialog({ chart, entries }: { chart: SizeChart; entries: SizeChartEntry[] }) {
-  const measurementKeys = entries.length ? Object.keys(entries[0].measurements) : [];
-
+export function SizeChartDialog({ chart }: { chart: SizeChart }) {
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="link" size="sm" className="h-auto p-0 text-brand-navy" />}>
@@ -22,39 +20,31 @@ export function SizeChartDialog({ chart, entries }: { chart: SizeChart; entries:
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{chart.name} — Size Chart</DialogTitle>
+          <DialogTitle>{chart.title} — Size Chart</DialogTitle>
         </DialogHeader>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Size</TableHead>
-                {measurementKeys.map((k) => (
-                  <TableHead key={k} className="capitalize">
-                    {k.replace(/_/g, " ")}
-                  </TableHead>
+                {chart.columns.map((col) => (
+                  <TableHead key={col}>{col}</TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="font-medium">{entry.size_label}</TableCell>
-                  {measurementKeys.map((k) => (
-                    <TableCell key={k}>{entry.measurements[k]}</TableCell>
+              {chart.rows.map((row, i) => (
+                <TableRow key={i}>
+                  {chart.columns.map((col, j) => (
+                    <TableCell key={col} className={j === 0 ? "font-medium" : undefined}>
+                      {row[col]}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-        <p className="text-xs text-muted-foreground">
-          All measurements are in inches unless stated otherwise. Need help? See our{" "}
-          <a href="/size-guide" className="underline">
-            How to Measure
-          </a>{" "}
-          guide.
-        </p>
+        {chart.note && <p className="text-xs text-muted-foreground">{chart.note}</p>}
       </DialogContent>
     </Dialog>
   );

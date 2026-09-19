@@ -36,13 +36,13 @@ export function ProductForm({
     fabric: product?.fabric ?? "",
     price: product?.price ?? 0,
     mrp: product?.mrp ?? null,
-    gst_rate: product?.gst_rate ?? 5,
+    gst_percent: product?.gst_percent ?? 5,
     tags: product?.tags ?? [],
     is_featured: product?.is_featured ?? false,
     is_best_seller: product?.is_best_seller ?? false,
     is_new_arrival: product?.is_new_arrival ?? false,
     is_active: product?.is_active ?? true,
-    size_chart_id: product?.size_chart_id ?? null,
+    size_chart_key: product?.size_chart_key ?? null,
   });
 
   function set<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
@@ -119,15 +119,15 @@ export function ProductForm({
         </div>
         <div className="space-y-1.5">
           <Label>GST Rate (%)</Label>
-          <Input type="number" value={form.gst_rate} onChange={(e) => set("gst_rate", Number(e.target.value))} />
+          <Input type="number" value={form.gst_percent} onChange={(e) => set("gst_percent", Number(e.target.value))} />
         </div>
         <div className="space-y-1.5">
           <Label>Size Chart</Label>
-          <Select value={form.size_chart_id ?? undefined} onValueChange={(v) => set("size_chart_id", v)}>
+          <Select value={form.size_chart_key ?? undefined} onValueChange={(v) => set("size_chart_key", v)}>
             <SelectTrigger className="w-full"><SelectValue placeholder="None" /></SelectTrigger>
             <SelectContent>
               {sizeCharts.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                <SelectItem key={s.id} value={s.key}>{s.title}</SelectItem>
               ))}
             </SelectContent>
           </Select>

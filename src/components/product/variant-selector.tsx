@@ -33,7 +33,7 @@ export function VariantSelector({
   const [pending, startTransition] = useTransition();
 
   const selectedVariant = sizesForColour.find((v) => v.size === size) ?? null;
-  const inStock = (selectedVariant?.stock_available ?? 0) > 0;
+  const inStock = (selectedVariant?.stock ?? 0) > 0;
   const discount =
     product.mrp && product.mrp > product.price
       ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
@@ -97,7 +97,7 @@ export function VariantSelector({
           {sizesForColour.map((v) => (
             <button
               key={v.id}
-              disabled={v.stock_available === 0}
+              disabled={v.stock === 0}
               onClick={() => setSize(v.size)}
               className={cn(
                 "rounded-md border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40",
@@ -119,7 +119,7 @@ export function VariantSelector({
           <span className="w-8 text-center text-sm">{qty}</span>
           <button
             className="p-2"
-            onClick={() => setQty((q) => Math.min(selectedVariant?.stock_available ?? 99, q + 1))}
+            onClick={() => setQty((q) => Math.min(selectedVariant?.stock ?? 99, q + 1))}
             aria-label="Increase quantity"
           >
             <Plus className="size-3.5" />
