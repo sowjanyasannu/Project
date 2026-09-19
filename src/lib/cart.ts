@@ -145,6 +145,7 @@ export async function addToCartAction(variantId: string, quantity: number) {
   }
 
   revalidatePath("/cart");
+  revalidatePath("/checkout");
   return { error: null };
 }
 
@@ -153,6 +154,7 @@ export async function updateCartItemAction(itemId: string, quantity: number) {
   if (quantity <= 0) {
     await admin.from("cart_items").delete().eq("id", itemId);
     revalidatePath("/cart");
+    revalidatePath("/checkout");
     return { error: null };
   }
 
@@ -175,6 +177,7 @@ export async function updateCartItemAction(itemId: string, quantity: number) {
 
   await admin.from("cart_items").update({ quantity }).eq("id", itemId);
   revalidatePath("/cart");
+  revalidatePath("/checkout");
   return { error: null };
 }
 
@@ -182,6 +185,7 @@ export async function removeCartItemAction(itemId: string) {
   const admin = createAdminSupabaseClient();
   await admin.from("cart_items").delete().eq("id", itemId);
   revalidatePath("/cart");
+  revalidatePath("/checkout");
 }
 
 export async function getCartSummary(): Promise<{

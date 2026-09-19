@@ -12,7 +12,7 @@ export function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: string | n
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105 md:bottom-6"
+      className="fixed bottom-28 right-4 z-40 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105 md:bottom-14"
       aria-label="Chat with Jobert Apparels on WhatsApp"
     >
       <MessageCircle className="size-5" />

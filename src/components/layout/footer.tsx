@@ -15,10 +15,11 @@ export function Footer({ settings }: { settings: SiteSettings }) {
         <div>
           <p className="text-sm font-semibold text-white">Shop</p>
           <ul className="mt-3 space-y-2 text-sm text-white/70">
-            <li><Link href="/shop/school-uniforms" className="hover:text-white">School Uniforms</Link></li>
+            <li><Link href="/shop/uniform" className="hover:text-white">Uniform</Link></li>
+            <li><Link href="/shop/school-uniforms" className="hover:text-white">School Uniform</Link></li>
+            <li><Link href="/shop/medical" className="hover:text-white">Medical</Link></li>
+            <li><Link href="/shop/hotel" className="hover:text-white">Hotel</Link></li>
             <li><Link href="/shop/corporate-uniforms" className="hover:text-white">Corporate Uniforms</Link></li>
-            <li><Link href="/shop/healthcare" className="hover:text-white">Healthcare</Link></li>
-            <li><Link href="/shop/hospitality" className="hover:text-white">Hospitality</Link></li>
             <li><Link href="/shop/sportswear" className="hover:text-white">Sportswear</Link></li>
           </ul>
         </div>

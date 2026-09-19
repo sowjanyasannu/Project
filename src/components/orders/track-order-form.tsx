@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,12 @@ export function TrackOrderForm() {
             <p className="font-heading text-lg font-semibold text-brand-navy">{result.order.order_number}</p>
             <p className="text-xs text-muted-foreground">Placed {formatDate(result.order.created_at)}</p>
           </div>
+          {result.order.delay_note && (
+            <div className="mt-4 flex gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              <p>{result.order.delay_note}</p>
+            </div>
+          )}
           <div className="mt-4">
             <OrderTimeline status={result.order.status} />
           </div>

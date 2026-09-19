@@ -28,17 +28,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return (data as SiteSettings | null) ?? DEFAULT_SETTINGS;
 }
 
-export async function getTopCategories(): Promise<Category[]> {
-  const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .is("parent_id", null)
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
-  return (data as Category[]) ?? [];
-}
-
 export async function getAllCategories(): Promise<Category[]> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
@@ -47,4 +36,17 @@ export async function getAllCategories(): Promise<Category[]> {
     .eq("is_active", true)
     .order("display_order", { ascending: true });
   return (data as Category[]) ?? [];
+}
+
+export interface CategoryWithChildren extends Category {
+  children: Category[];
+}
+
+export async function getNavCategories(): Promise<CategoryWithChildren[]> {
+  const all = await getAllCategories();
+  const topLevel = all.filter((c) => !c.parent_id);
+  return topLevel.map((category) => ({
+    ...category,
+    children: all.filter((c) => c.parent_id === category.id),
+  }));
 }

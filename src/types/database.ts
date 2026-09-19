@@ -224,6 +224,8 @@ export interface Order {
   shipping_address: Address_;
   billing_address: Address_;
   customer_notes: string | null;
+  delay_note: string | null;
+  delay_note_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }

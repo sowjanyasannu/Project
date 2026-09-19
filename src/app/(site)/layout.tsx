@@ -2,16 +2,16 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
-import { AnnouncementBar } from "@/components/layout/announcement-bar";
+import { BottomTicker } from "@/components/layout/bottom-ticker";
 import { BackToTop } from "@/components/layout/back-to-top";
-import { getSiteSettings, getTopCategories } from "@/lib/data/site";
+import { getSiteSettings, getNavCategories } from "@/lib/data/site";
 import { getCartSummary } from "@/lib/cart";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [settings, categories, cartSummary, user] = await Promise.all([
     getSiteSettings(),
-    getTopCategories(),
+    getNavCategories(),
     getCartSummary(),
     getCurrentUser(),
   ]);
@@ -38,13 +38,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-      <AnnouncementBar />
-      <Header categories={categories} cart={cart} isSignedIn={Boolean(user)} />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <Header categories={categories} cart={cart} isSignedIn={Boolean(user)} phone={settings.phone} />
+      <main className="flex-1 pb-28 md:pb-9">{children}</main>
       <Footer settings={settings} />
       <MobileNav />
       <BackToTop />
       <WhatsAppButton whatsappNumber={settings.whatsapp_number} />
+      <BottomTicker settings={settings} />
     </>
   );
 }

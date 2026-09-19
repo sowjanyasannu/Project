@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OrderStatusSelect } from "@/components/admin/order-status-select";
+import { DelayNoteForm } from "@/components/admin/delay-note-form";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formatDate, formatINR } from "@/lib/format";
 import type { Order, OrderItem } from "@/types/database";
@@ -88,6 +89,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               <p className="text-sm text-muted-foreground">{o.customer_notes}</p>
             </div>
           )}
+          <DelayNoteForm orderId={id} initialNote={o.delay_note} updatedAt={o.delay_note_updated_at} />
         </div>
       </div>
     </div>
