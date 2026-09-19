@@ -60,7 +60,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
             <span className="w-8 text-center text-sm">{line.quantity}</span>
             <button
               className="p-1.5 disabled:opacity-40"
-              disabled={pending || line.quantity >= line.variant.stock}
+              disabled={pending || line.quantity >= line.variant.stock_available}
               onClick={() =>
                 startTransition(async () => {
                   await updateCartItemAction(line.id, line.quantity + 1);

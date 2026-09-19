@@ -10,9 +10,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SizeChart } from "@/types/database";
+import type { SizeChart, SizeChartEntry } from "@/types/database";
 
-export function SizeChartDialog({ chart }: { chart: SizeChart }) {
+export function SizeChartDialog({ chart, entries }: { chart: SizeChart; entries: SizeChartEntry[] }) {
+  const measurementKeys = entries.length ? Object.keys(entries[0].measurements) : [];
+
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="link" size="sm" className="h-auto p-0 text-brand-navy" />}>
@@ -20,31 +22,39 @@ export function SizeChartDialog({ chart }: { chart: SizeChart }) {
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{chart.title} — Size Chart</DialogTitle>
+          <DialogTitle>{chart.name} — Size Chart</DialogTitle>
         </DialogHeader>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                {chart.columns.map((col) => (
-                  <TableHead key={col}>{col}</TableHead>
+                <TableHead>Size</TableHead>
+                {measurementKeys.map((k) => (
+                  <TableHead key={k} className="capitalize">
+                    {k.replace(/_/g, " ")}
+                  </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {chart.rows.map((row, i) => (
-                <TableRow key={i}>
-                  {chart.columns.map((col, j) => (
-                    <TableCell key={col} className={j === 0 ? "font-medium" : undefined}>
-                      {row[col]}
-                    </TableCell>
+              {entries.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell className="font-medium">{entry.size_label}</TableCell>
+                  {measurementKeys.map((k) => (
+                    <TableCell key={k}>{entry.measurements[k]}</TableCell>
                   ))}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-        {chart.note && <p className="text-xs text-muted-foreground">{chart.note}</p>}
+        <p className="text-xs text-muted-foreground">
+          All measurements are in inches unless stated otherwise. Need help? See our{" "}
+          <a href="/size-guide" className="underline">
+            How to Measure
+          </a>{" "}
+          guide.
+        </p>
       </DialogContent>
     </Dialog>
   );

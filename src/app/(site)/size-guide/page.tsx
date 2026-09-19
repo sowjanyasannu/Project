@@ -1,12 +1,13 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { SizeChart } from "@/types/database";
+import type { SizeChart, SizeChartEntry } from "@/types/database";
 
 export const metadata = { title: "Size Guide" };
 
 export default async function SizeGuidePage() {
   const supabase = await createServerSupabaseClient();
-  const { data: charts } = await supabase.from("size_charts").select("*").order("display_order");
+  const { data: charts } = await supabase.from("size_charts").select("*");
+  const { data: entries } = await supabase.from("size_chart_entries").select("*").order("display_order");
 
   return (
     <div className="container-app max-w-3xl py-14">
@@ -16,34 +17,37 @@ export default async function SizeGuidePage() {
       </p>
 
       <div className="mt-8 space-y-10">
-        {((charts as SizeChart[]) ?? []).map((chart) => (
-          <div key={chart.id}>
-            <h2 className="font-heading text-lg font-semibold text-brand-navy">{chart.title}</h2>
-            <div className="mt-3 overflow-x-auto rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {chart.columns.map((col) => (
-                      <TableHead key={col}>{col}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {chart.rows.map((row, i) => (
-                    <TableRow key={i}>
-                      {chart.columns.map((col, j) => (
-                        <TableCell key={col} className={j === 0 ? "font-medium" : undefined}>
-                          {row[col]}
-                        </TableCell>
+        {((charts as SizeChart[]) ?? []).map((chart) => {
+          const chartEntries = ((entries as SizeChartEntry[]) ?? []).filter((e) => e.size_chart_id === chart.id);
+          const keys = chartEntries.length ? Object.keys(chartEntries[0].measurements) : [];
+          return (
+            <div key={chart.id}>
+              <h2 className="font-heading text-lg font-semibold text-brand-navy">{chart.name}</h2>
+              <div className="mt-3 overflow-x-auto rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Size</TableHead>
+                      {keys.map((k) => (
+                        <TableHead key={k} className="capitalize">{k.replace(/_/g, " ")}</TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {chartEntries.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell className="font-medium">{entry.size_label}</TableCell>
+                        {keys.map((k) => (
+                          <TableCell key={k}>{entry.measurements[k]}</TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-            {chart.note && <p className="mt-2 text-xs text-muted-foreground">{chart.note}</p>}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-12 rounded-xl border p-6">

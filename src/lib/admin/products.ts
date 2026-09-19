@@ -16,13 +16,13 @@ export interface ProductInput {
   fabric: string;
   price: number;
   mrp: number | null;
-  gst_percent: number;
+  gst_rate: number;
   tags: string[];
   is_featured: boolean;
   is_best_seller: boolean;
   is_new_arrival: boolean;
   is_active: boolean;
-  size_chart_key: string | null;
+  size_chart_id: string | null;
 }
 
 export async function createProductAction(input: ProductInput) {
@@ -63,7 +63,7 @@ export async function addVariantAction(params: {
   colour: string;
   size: string;
   sku: string;
-  stock: number;
+  stock_available: number;
   low_stock_threshold: number;
 }) {
   await requireAdmin(["super_admin", "product_manager"]);
@@ -74,10 +74,10 @@ export async function addVariantAction(params: {
   return { error: null };
 }
 
-export async function updateVariantStockAction(variantId: string, productId: string, stock: number) {
+export async function updateVariantStockAction(variantId: string, productId: string, stockAvailable: number) {
   await requireAdmin(["super_admin", "product_manager"]);
   const admin = createAdminSupabaseClient();
-  await admin.from("product_variants").update({ stock }).eq("id", variantId);
+  await admin.from("product_variants").update({ stock_available: stockAvailable }).eq("id", variantId);
   revalidatePath(`/admin/products/${productId}`);
 }
 
@@ -91,17 +91,17 @@ export async function deleteVariantAction(variantId: string, productId: string) 
 export async function addProductImageAction(productId: string, url: string) {
   await requireAdmin(["super_admin", "product_manager"]);
   const admin = createAdminSupabaseClient();
-  const { data: product } = await admin.from("products").select("images").eq("id", productId).single();
-  const images = [...((product?.images as string[]) ?? []), url];
-  await admin.from("products").update({ images }).eq("id", productId);
+  const { count } = await admin
+    .from("product_images")
+    .select("id", { count: "exact", head: true })
+    .eq("product_id", productId);
+  await admin.from("product_images").insert({ product_id: productId, url, display_order: count ?? 0 });
   revalidatePath(`/admin/products/${productId}`);
 }
 
-export async function deleteProductImageAction(url: string, productId: string) {
+export async function deleteProductImageAction(imageId: string, productId: string) {
   await requireAdmin(["super_admin", "product_manager"]);
   const admin = createAdminSupabaseClient();
-  const { data: product } = await admin.from("products").select("images").eq("id", productId).single();
-  const images = ((product?.images as string[]) ?? []).filter((u) => u !== url);
-  await admin.from("products").update({ images }).eq("id", productId);
+  await admin.from("product_images").delete().eq("id", imageId);
   revalidatePath(`/admin/products/${productId}`);
 }

@@ -78,72 +78,78 @@ export interface Category {
   name: string;
   slug: string;
   description: string | null;
-  short_description: string | null;
   image_url: string | null;
   display_order: number;
   is_active: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Product {
   id: string;
   category_id: string | null;
-  subcategory_id: string | null;
   name: string;
   slug: string;
-  sku: string | null;
-  short_description: string | null;
+  sku: string;
   description: string | null;
-  images: string[];
-  video_url: string | null;
-  price: number;
-  mrp: number | null;
-  gst_percent: number;
+  short_description: string | null;
   gender: ProductGender;
   age_group: string | null;
   fabric: string | null;
-  weight_grams: number | null;
   care_instructions: string | null;
-  size_chart_key: string | null;
+  price: number;
+  mrp: number | null;
+  gst_rate: number;
   tags: string[];
   is_featured: boolean;
   is_best_seller: boolean;
   is_new_arrival: boolean;
   is_active: boolean;
-  rating: number;
-  review_count: number;
+  seo_title: string | null;
+  meta_description: string | null;
+  size_chart_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  url: string;
+  alt_text: string | null;
+  display_order: number;
 }
 
 export interface ProductVariant {
   id: string;
   product_id: string;
   colour: string;
-  colour_hex: string | null;
   size: string;
-  sku: string | null;
-  price_adjustment: number;
-  stock: number;
+  sku: string;
+  price_override: number | null;
+  stock_available: number;
+  stock_reserved: number;
+  stock_sold: number;
   low_stock_threshold: number;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface SizeChart {
   id: string;
-  key: string;
-  title: string;
-  note: string | null;
-  columns: string[];
-  rows: Record<string, string>[];
+  garment_type: string;
+  name: string;
+}
+
+export interface SizeChartEntry {
+  id: string;
+  size_chart_id: string;
+  size_label: string;
+  measurements: Record<string, number>;
   display_order: number;
 }
 
 export interface ProductWithRelations extends Product {
   category: Category | null;
+  images: ProductImage[];
   variants: ProductVariant[];
 }
 
