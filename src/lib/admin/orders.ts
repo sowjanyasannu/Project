@@ -34,19 +34,3 @@ export async function updateOrderStatusAction(orderId: string, status: OrderStat
   revalidatePath("/admin/orders");
   return { error: null };
 }
-
-export async function updateOrderDelayNoteAction(orderId: string, note: string) {
-  await requireAdmin(["super_admin", "order_manager"]);
-  const admin = createAdminSupabaseClient();
-
-  const trimmed = note.trim();
-  await admin
-    .from("orders")
-    .update({ delay_note: trimmed || null, delay_note_updated_at: trimmed ? new Date().toISOString() : null })
-    .eq("id", orderId);
-
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath(`/account/orders/${orderId}`);
-  revalidatePath("/track-order");
-  return { error: null };
-}

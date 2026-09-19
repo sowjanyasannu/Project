@@ -147,14 +147,7 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<{
       .select("id")
       .eq("slug", filters.categorySlug)
       .maybeSingle();
-    if (category) {
-      const { data: children } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("parent_id", category.id);
-      const categoryIds = [category.id, ...(children ?? []).map((c) => c.id)];
-      query = query.in("category_id", categoryIds);
-    }
+    if (category) query = query.eq("category_id", category.id);
   }
   if (filters.gender) query = query.eq("gender", filters.gender);
   if (filters.minPrice !== undefined) query = query.gte("price", filters.minPrice);

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Palette } from "lucide-react";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/product/wishlist-button";
 import { AddToCartButton } from "@/components/product/add-to-cart-button";
 import { formatINR } from "@/lib/format";
@@ -84,17 +83,11 @@ export function ProductCard({
           <p className="text-[11px] text-muted-foreground">Sizes: {product.sizes.join(", ")}</p>
         )}
 
-        <div className="mt-2 flex gap-2">
-          <AddToCartButton variantId={product.defaultVariantId} inStock={product.in_stock} className="flex-1" />
-          <Button
-            size="sm"
-            variant="outline"
-            className="shrink-0 px-2.5 text-muted-foreground hover:border-brand-navy hover:text-brand-navy"
-            render={<Link href={`/custom-uniforms?product=${product.slug}`} aria-label="Customize this product" />}
-          >
-            <Palette className="size-3.5" />
-          </Button>
-        </div>
+        <AddToCartButton
+          variantId={product.defaultVariantId}
+          inStock={product.in_stock}
+          className="mt-2"
+        />
       </div>
     </div>
   );

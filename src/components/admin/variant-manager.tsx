@@ -1,77 +1,13 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { addVariantAction, deleteVariantAction, updateVariantStockAction } from "@/lib/admin/products";
 import type { ProductVariant } from "@/types/database";
-
-function VariantRow({ productId, variant }: { productId: string; variant: ProductVariant }) {
-  const [pending, startTransition] = useTransition();
-  const lastStockRef = useRef(variant.stock_available > 0 ? variant.stock_available : 1);
-  const unavailable = variant.stock_available === 0;
-
-  return (
-    <TableRow>
-      <TableCell>{variant.colour}</TableCell>
-      <TableCell>{variant.size}</TableCell>
-      <TableCell className="text-muted-foreground">{variant.sku}</TableCell>
-      <TableCell>
-        <Input
-          type="number"
-          className="w-20"
-          disabled={pending}
-          defaultValue={variant.stock_available}
-          onBlur={(e) => {
-            const next = Number(e.target.value);
-            if (next > 0) lastStockRef.current = next;
-            startTransition(() => updateVariantStockAction(variant.id, productId, next));
-          }}
-        />
-      </TableCell>
-      <TableCell>
-        {unavailable ? (
-          <div className="flex items-center gap-2">
-            <Badge variant="destructive">Not available</Badge>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => startTransition(() => updateVariantStockAction(variant.id, productId, lastStockRef.current))}
-              className="text-xs font-medium text-brand-navy hover:underline"
-            >
-              Restock
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => {
-              lastStockRef.current = variant.stock_available;
-              startTransition(() => updateVariantStockAction(variant.id, productId, 0));
-            }}
-            className="text-xs font-medium text-muted-foreground hover:text-destructive"
-          >
-            Mark unavailable
-          </button>
-        )}
-      </TableCell>
-      <TableCell>
-        <button
-          aria-label="Delete variant"
-          onClick={() => startTransition(() => deleteVariantAction(variant.id, productId))}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="size-4" />
-        </button>
-      </TableCell>
-    </TableRow>
-  );
-}
 
 export function VariantManager({ productId, variants }: { productId: string; variants: ProductVariant[] }) {
   const [pending, startTransition] = useTransition();
@@ -80,9 +16,6 @@ export function VariantManager({ productId, variants }: { productId: string; var
   return (
     <div className="rounded-xl border bg-background p-6">
       <p className="mb-4 text-sm font-semibold">Variants (Colour / Size / Stock)</p>
-      <p className="mb-3 text-xs text-muted-foreground">
-        A size at 0 stock shows on the storefront as disabled and can&apos;t be selected.
-      </p>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -91,13 +24,33 @@ export function VariantManager({ productId, variants }: { productId: string; var
               <TableHead>Size</TableHead>
               <TableHead>SKU</TableHead>
               <TableHead>Stock</TableHead>
-              <TableHead>Availability</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
             {variants.map((v) => (
-              <VariantRow key={v.id} productId={productId} variant={v} />
+              <TableRow key={v.id}>
+                <TableCell>{v.colour}</TableCell>
+                <TableCell>{v.size}</TableCell>
+                <TableCell className="text-muted-foreground">{v.sku}</TableCell>
+                <TableCell>
+                  <Input
+                    type="number"
+                    className="w-20"
+                    defaultValue={v.stock_available}
+                    onBlur={(e) => startTransition(() => updateVariantStockAction(v.id, productId, Number(e.target.value)))}
+                  />
+                </TableCell>
+                <TableCell>
+                  <button
+                    aria-label="Delete variant"
+                    onClick={() => startTransition(() => deleteVariantAction(v.id, productId))}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>

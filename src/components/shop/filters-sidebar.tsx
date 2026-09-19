@@ -4,6 +4,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
+const GENDERS = ["men", "women", "boys", "girls", "unisex"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "24", "26", "28", "30", "32", "34"];
 const PRICE_BANDS = [
   { label: "Under ₹500", min: 0, max: 500 },
@@ -25,11 +26,23 @@ export function FiltersSidebar() {
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  const activeGender = searchParams.get("gender") ?? "";
   const activeSize = searchParams.get("size") ?? "";
   const activeMin = searchParams.get("minPrice") ?? "";
 
   return (
     <aside className="space-y-6">
+      <div>
+        <p className="mb-3 text-sm font-semibold">Gender</p>
+        <div className="space-y-2">
+          {GENDERS.map((g) => (
+            <label key={g} className="flex items-center gap-2 text-sm capitalize">
+              <Checkbox checked={activeGender === g} onCheckedChange={() => setParam("gender", activeGender === g ? undefined : g)} />
+              {g}
+            </label>
+          ))}
+        </div>
+      </div>
       <div>
         <p className="mb-3 text-sm font-semibold">Size</p>
         <div className="flex flex-wrap gap-2">

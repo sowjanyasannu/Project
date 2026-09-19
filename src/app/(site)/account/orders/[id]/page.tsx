@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
 import { OrderTimeline } from "@/components/orders/order-timeline";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
@@ -49,13 +48,6 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </Button>
         </div>
       </div>
-
-      {o.delay_note && (
-        <div className="mb-6 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          <p>{o.delay_note}</p>
-        </div>
-      )}
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="rounded-xl border p-6">

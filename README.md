@@ -33,13 +33,10 @@ both custom uniforms and bulk orders — with every flow wired to a real databas
   authorization, file type/size validation on all uploads, Razorpay secret key and webhook secret
   never exposed to the client.
 
-The original 3 SQL migrations and the seed script were executed end-to-end against a real local Postgres
+All 3 SQL migrations and the seed script were executed end-to-end against a real local Postgres
 instance during development (with `auth`/`storage` schemas stubbed to match Supabase) to confirm
 they apply cleanly, the document-numbering triggers work, RLS policies compile, and `updated_at`
-triggers fire correctly. A 4th migration (`0004_order_delay_note.sql`, adding `orders.delay_note`)
-was added later as a simple additive `alter table` and has not been separately re-verified against
-a live/stubbed Postgres instance — run it and confirm it applies cleanly before relying on it.
-`npm run build` and `npx tsc --noEmit` both pass with zero errors.
+triggers fire correctly. `npm run build` and `npx tsc --noEmit` both pass with zero errors.
 
 **What I could not verify**: I don't have credentials for a live Supabase project, Razorpay
 account, Resend account, or WhatsApp number, so the actual signed-in browser flows (place a real
@@ -83,8 +80,8 @@ style — see note below) · Supabase (Postgres + Auth + Storage + RLS) · Razor
 
 ### 1. Create a Supabase project
 
-At [supabase.com](https://supabase.com), create a project, then in the SQL Editor run the four
-files in `supabase/migrations/` **in order** (0001 → 0002 → 0003 → 0004). Optionally run
+At [supabase.com](https://supabase.com), create a project, then in the SQL Editor run the three
+files in `supabase/migrations/` **in order** (0001 → 0002 → 0003). Optionally run
 `supabase/seed.sql` for browsable demo data — **never run seed.sql against production**, it's
 placeholder content only (see spec §54: real prices/GSTIN/photography must come from Jobert).
 

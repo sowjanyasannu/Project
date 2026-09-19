@@ -149,16 +149,3 @@
     @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8;
   }
 }
-
-@keyframes ticker-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-ticker {
-  animation: ticker-scroll 28s linear infinite;
-}

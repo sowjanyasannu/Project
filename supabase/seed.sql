@@ -9,20 +9,14 @@
 -- =============================================================================
 
 -- Categories -----------------------------------------------------------------
--- "Uniform" is the top-level umbrella category; School Uniform / Medical / Hotel
--- (previously their own top-level School Uniforms / Healthcare / Hospitality rows)
--- now live underneath it as children, one level deep.
 insert into public.categories (id, name, slug, description, image_url, display_order) values
-  ('11111111-0000-0000-0000-000000000008', 'Uniform', 'uniform', 'Uniforms for every institution — schools, hospitals, hotels and more.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Uniform', 1),
+  ('11111111-0000-0000-0000-000000000001', 'School Uniforms', 'school-uniforms', 'Shirts, trousers, skirts, blazers and sportswear for schools.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=School+Uniforms', 1),
   ('11111111-0000-0000-0000-000000000002', 'Corporate Uniforms', 'corporate-uniforms', 'Formal and corporate wear for companies.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Corporate+Uniforms', 2),
   ('11111111-0000-0000-0000-000000000003', 'Industrial Uniforms', 'industrial-uniforms', 'Workwear, safety wear and factory uniforms.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Industrial+Uniforms', 3),
-  ('11111111-0000-0000-0000-000000000006', 'Sportswear', 'sportswear', 'Jerseys, tracksuits and team sportswear.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Sportswear', 4),
-  ('11111111-0000-0000-0000-000000000007', 'Accessories', 'accessories', 'Ties, belts, caps and socks.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Accessories', 5);
-
-insert into public.categories (id, parent_id, name, slug, description, image_url, display_order) values
-  ('11111111-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000008', 'School Uniform', 'school-uniforms', 'Shirts, trousers, skirts, blazers and sportswear for schools.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=School+Uniform', 1),
-  ('11111111-0000-0000-0000-000000000005', '11111111-0000-0000-0000-000000000008', 'Medical', 'medical', 'Scrubs, nurse and doctor uniforms.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Medical', 2),
-  ('11111111-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000008', 'Hotel', 'hotel', 'Hotel, restaurant and housekeeping uniforms.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Hotel', 3);
+  ('11111111-0000-0000-0000-000000000004', 'Hospitality', 'hospitality', 'Hotel, restaurant and housekeeping uniforms.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Hospitality', 4),
+  ('11111111-0000-0000-0000-000000000005', 'Healthcare', 'healthcare', 'Scrubs, nurse and doctor uniforms.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Healthcare', 5),
+  ('11111111-0000-0000-0000-000000000006', 'Sportswear', 'sportswear', 'Jerseys, tracksuits and team sportswear.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Sportswear', 6),
+  ('11111111-0000-0000-0000-000000000007', 'Accessories', 'accessories', 'Ties, belts, caps and socks.', 'https://placehold.co/800x600/1e3a5f/ffffff?text=Accessories', 7);
 
 insert into public.categories (parent_id, name, slug, description, display_order) values
   ('11111111-0000-0000-0000-000000000001', 'School Shirts', 'school-shirts', 'Shirts for boys and girls.', 1),
