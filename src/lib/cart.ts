@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { firstValidImage } from "@/lib/images";
 import type { Product, ProductVariant } from "@/types/database";
 
 const CART_COOKIE = "jobert_cart_token";
@@ -211,7 +212,7 @@ export async function getCartSummary(): Promise<{
       saved_for_later: item.saved_for_later,
       product,
       variant,
-      image: product.images?.[0] ?? null,
+      image: firstValidImage(product.images),
     };
   });
 

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { firstValidImage } from "@/lib/images";
 import type { Category, Product, ProductVariant, ProductWithRelations, SizeChart } from "@/types/database";
 
 const PRODUCT_WITH_CATEGORY = "*, category:categories!products_category_id_fkey(*)";
@@ -35,7 +36,7 @@ async function attachCardFields(products: (Product & { category: Category | null
     const inStockVariant = activeVariants.find((v) => v.stock > 0) ?? null;
     return {
       ...p,
-      image: p.images?.[0] ?? null,
+      image: firstValidImage(p.images),
       category: p.category ? { name: p.category.name, slug: p.category.slug } : null,
       sizes: [...new Set(activeVariants.map((v) => v.size))],
       colours: [...new Set(activeVariants.map((v) => v.colour))],

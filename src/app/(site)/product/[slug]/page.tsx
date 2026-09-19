@@ -12,6 +12,7 @@ import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { getProductBySlug, getRelatedProducts, getSizeChart } from "@/lib/data/catalog";
 import { getSiteSettings } from "@/lib/data/site";
 import { getWishlistProductIds } from "@/lib/wishlist";
+import { validImages } from "@/lib/images";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,10 +22,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return {};
+  const images = validImages(product.images);
   return {
     title: product.name,
     description: product.short_description ?? undefined,
-    openGraph: product.images[0] ? { images: [product.images[0]] } : undefined,
+    openGraph: images[0] ? { images: [images[0]] } : undefined,
   };
 }
 
@@ -40,11 +42,13 @@ export default async function ProductPage({ params }: Props) {
     product.size_chart_key ? getSizeChart(product.size_chart_key) : Promise.resolve(null),
   ]);
 
+  const galleryImages = validImages(product.images);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.images,
+    image: galleryImages,
     description: product.short_description ?? product.description,
     sku: product.sku,
     offers: {
@@ -82,7 +86,7 @@ export default async function ProductPage({ params }: Props) {
       </Breadcrumb>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <ProductGallery images={product.images} productName={product.name} />
+        <ProductGallery images={galleryImages} productName={product.name} />
 
         <div>
           {product.category && (
