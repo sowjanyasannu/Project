@@ -5,8 +5,9 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { UploadCloud, X, Loader2 } from "lucide-react";
 import { addProductImageAction, deleteProductImageAction } from "@/lib/admin/products";
+import type { ProductImage } from "@/types/database";
 
-export function ImageManager({ productId, images }: { productId: string; images: string[] }) {
+export function ImageManager({ productId, images }: { productId: string; images: ProductImage[] }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -33,11 +34,11 @@ export function ImageManager({ productId, images }: { productId: string; images:
     <div className="rounded-xl border bg-background p-6">
       <p className="mb-4 text-sm font-semibold">Product Images</p>
       <div className="flex flex-wrap gap-3">
-        {images.map((url) => (
-          <div key={url} className="relative size-24 overflow-hidden rounded-lg border">
-            <Image src={url} alt="" fill sizes="96px" className="object-cover" />
+        {images.map((img) => (
+          <div key={img.id} className="relative size-24 overflow-hidden rounded-lg border">
+            <Image src={img.url} alt="" fill sizes="96px" className="object-cover" />
             <button
-              onClick={() => startTransition(() => deleteProductImageAction(url, productId))}
+              onClick={() => startTransition(() => deleteProductImageAction(img.id, productId))}
               className="absolute right-1 top-1 rounded-full bg-white/90 p-0.5"
               aria-label="Remove image"
               disabled={pending}

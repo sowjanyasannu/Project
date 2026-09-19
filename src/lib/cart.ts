@@ -5,8 +5,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { firstValidImage } from "@/lib/images";
-import type { Product, ProductVariant } from "@/types/database";
+import type { Product, ProductImage, ProductVariant } from "@/types/database";
 
 const CART_COOKIE = "jobert_cart_token";
 
@@ -15,7 +14,7 @@ export interface CartLine {
   quantity: number;
   saved_for_later: boolean;
   product: Pick<Product, "id" | "name" | "slug" | "price" | "mrp">;
-  variant: Pick<ProductVariant, "id" | "colour" | "size" | "stock">;
+  variant: Pick<ProductVariant, "id" | "colour" | "size" | "stock_available">;
   image: string | null;
 }
 
@@ -115,7 +114,7 @@ export async function addToCartAction(variantId: string, quantity: number) {
 
   const { data: variant, error: variantError } = await admin
     .from("product_variants")
-    .select("id, product_id, stock, is_active")
+    .select("id, product_id, stock_available, is_active")
     .eq("id", variantId)
     .single();
   if (variantError || !variant || !variant.is_active) {
@@ -130,8 +129,8 @@ export async function addToCartAction(variantId: string, quantity: number) {
     .maybeSingle();
 
   const nextQuantity = (existingItem?.quantity ?? 0) + quantity;
-  if (nextQuantity > variant.stock) {
-    return { error: `Only ${variant.stock} left in stock.` };
+  if (nextQuantity > variant.stock_available) {
+    return { error: `Only ${variant.stock_available} left in stock.` };
   }
 
   if (existingItem) {
@@ -166,12 +165,12 @@ export async function updateCartItemAction(itemId: string, quantity: number) {
 
   const { data: variant } = await admin
     .from("product_variants")
-    .select("stock")
+    .select("stock_available")
     .eq("id", item.variant_id)
     .single();
 
-  if (variant && quantity > variant.stock) {
-    return { error: `Only ${variant.stock} left in stock.` };
+  if (variant && quantity > variant.stock_available) {
+    return { error: `Only ${variant.stock_available} left in stock.` };
   }
 
   await admin.from("cart_items").update({ quantity }).eq("id", itemId);
@@ -197,14 +196,28 @@ export async function getCartSummary(): Promise<{
   const { data: items } = await admin
     .from("cart_items")
     .select(
-      "id, quantity, saved_for_later, product:products(id, name, slug, price, mrp, images), variant:product_variants(id, colour, size, stock)"
+      "id, quantity, saved_for_later, product:products(id, name, slug, price, mrp), variant:product_variants(id, colour, size, stock_available)"
     )
     .eq("cart_id", cartId)
     .eq("saved_for_later", false)
     .order("created_at", { ascending: true });
 
+  const productIds = (items ?? []).map((i) => (i.product as unknown as Product).id);
+  const { data: images } = productIds.length
+    ? await admin
+        .from("product_images")
+        .select("product_id, url, display_order")
+        .in("product_id", productIds)
+        .order("display_order", { ascending: true })
+    : { data: [] as Pick<ProductImage, "product_id" | "url" | "display_order">[] };
+
+  const imageByProduct = new Map<string, string>();
+  for (const img of images ?? []) {
+    if (!imageByProduct.has(img.product_id)) imageByProduct.set(img.product_id, img.url);
+  }
+
   const lines: CartLine[] = (items ?? []).map((item) => {
-    const product = item.product as unknown as CartLine["product"] & { images: string[] };
+    const product = item.product as unknown as CartLine["product"];
     const variant = item.variant as unknown as CartLine["variant"];
     return {
       id: item.id,
@@ -212,7 +225,7 @@ export async function getCartSummary(): Promise<{
       saved_for_later: item.saved_for_later,
       product,
       variant,
-      image: firstValidImage(product.images),
+      image: imageByProduct.get(product.id) ?? null,
     };
   });
 

@@ -11,7 +11,7 @@ export default async function WishlistPage() {
 
   const { data: wishlist } = await supabase
     .from("wishlist_items")
-    .select("product_id, products(*, category:categories!products_category_id_fkey(*))")
+    .select("product_id, products(*, category:categories(*))")
     .eq("user_id", user!.id);
 
   const products = (wishlist ?? [])
