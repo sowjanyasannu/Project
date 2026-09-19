@@ -15,14 +15,14 @@ export function buildWhatsAppLink(message: string, configuredNumber?: string | n
 
 export function productEnquiryMessage(params: {
   productName: string;
-  sku: string;
+  sku?: string | null;
   size?: string;
 }): string {
   return [
     "Hello Jobert Apparels,",
     "I am interested in:",
     params.productName,
-    `SKU: ${params.sku}`,
+    params.sku ? `SKU: ${params.sku}` : undefined,
     params.size ? `Size: ${params.size}` : undefined,
     "I would like to know more about availability and pricing.",
   ]

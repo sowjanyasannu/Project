@@ -11,7 +11,7 @@ import type { ProductVariant } from "@/types/database";
 
 export function VariantManager({ productId, variants }: { productId: string; variants: ProductVariant[] }) {
   const [pending, startTransition] = useTransition();
-  const [form, setForm] = useState({ colour: "", size: "", sku: "", stock_available: 0, low_stock_threshold: 5 });
+  const [form, setForm] = useState({ colour: "", size: "", sku: "", stock: 0, low_stock_threshold: 5 });
 
   return (
     <div className="rounded-xl border bg-background p-6">
@@ -37,7 +37,7 @@ export function VariantManager({ productId, variants }: { productId: string; var
                   <Input
                     type="number"
                     className="w-20"
-                    defaultValue={v.stock_available}
+                    defaultValue={v.stock}
                     onBlur={(e) => startTransition(() => updateVariantStockAction(v.id, productId, Number(e.target.value)))}
                   />
                 </TableCell>
@@ -67,7 +67,7 @@ export function VariantManager({ productId, variants }: { productId: string; var
           startTransition(async () => {
             const result = await addVariantAction({ product_id: productId, ...form });
             if (result.error) toast.error(result.error);
-            else setForm({ colour: "", size: "", sku: "", stock_available: 0, low_stock_threshold: 5 });
+            else setForm({ colour: "", size: "", sku: "", stock: 0, low_stock_threshold: 5 });
           });
         }}
       >
@@ -77,8 +77,8 @@ export function VariantManager({ productId, variants }: { productId: string; var
         <Input
           type="number"
           placeholder="Stock"
-          value={form.stock_available}
-          onChange={(e) => setForm((f) => ({ ...f, stock_available: Number(e.target.value) }))}
+          value={form.stock}
+          onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
         />
         <Button type="submit" disabled={pending}>Add Variant</Button>
       </form>

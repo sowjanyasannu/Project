@@ -1,13 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type {
-  Category,
-  Product,
-  ProductImage,
-  ProductVariant,
-  ProductWithRelations,
-  SizeChart,
-  SizeChartEntry,
-} from "@/types/database";
+import type { Category, Product, ProductVariant, ProductWithRelations, SizeChart } from "@/types/database";
+
+const PRODUCT_WITH_CATEGORY = "*, category:categories!products_category_id_fkey(*)";
 
 export interface ProductCardData extends Product {
   image: string | null;
@@ -15,8 +9,6 @@ export interface ProductCardData extends Product {
   sizes: string[];
   colours: string[];
   in_stock: boolean;
-  rating: number;
-  review_count: number;
   defaultVariantId: string | null;
 }
 
@@ -25,23 +17,10 @@ async function attachCardFields(products: (Product & { category: Category | null
   if (products.length === 0) return [] as ProductCardData[];
 
   const ids = products.map((p) => p.id);
-  const [{ data: images }, { data: variants }, { data: reviews }] = await Promise.all([
-    supabase
-      .from("product_images")
-      .select("product_id, url, display_order")
-      .in("product_id", ids)
-      .order("display_order", { ascending: true }),
-    supabase
-      .from("product_variants")
-      .select("id, product_id, size, colour, stock_available, is_active")
-      .in("product_id", ids),
-    supabase.from("reviews").select("product_id, rating").in("product_id", ids).eq("is_approved", true),
-  ]);
-
-  const imageByProduct = new Map<string, string>();
-  for (const img of images ?? []) {
-    if (!imageByProduct.has(img.product_id)) imageByProduct.set(img.product_id, img.url);
-  }
+  const { data: variants } = await supabase
+    .from("product_variants")
+    .select("id, product_id, size, colour, stock, is_active")
+    .in("product_id", ids);
 
   const variantsByProduct = new Map<string, ProductVariant[]>();
   for (const v of (variants ?? []) as ProductVariant[]) {
@@ -50,28 +29,17 @@ async function attachCardFields(products: (Product & { category: Category | null
     variantsByProduct.set(v.product_id, list);
   }
 
-  const ratingByProduct = new Map<string, { sum: number; count: number }>();
-  for (const r of reviews ?? []) {
-    const entry = ratingByProduct.get(r.product_id) ?? { sum: 0, count: 0 };
-    entry.sum += r.rating;
-    entry.count += 1;
-    ratingByProduct.set(r.product_id, entry);
-  }
-
   return products.map((p): ProductCardData => {
     const variantList = variantsByProduct.get(p.id) ?? [];
     const activeVariants = variantList.filter((v) => v.is_active);
-    const rating = ratingByProduct.get(p.id);
-    const inStockVariant = activeVariants.find((v) => v.stock_available > 0) ?? null;
+    const inStockVariant = activeVariants.find((v) => v.stock > 0) ?? null;
     return {
       ...p,
-      image: imageByProduct.get(p.id) ?? null,
+      image: p.images?.[0] ?? null,
       category: p.category ? { name: p.category.name, slug: p.category.slug } : null,
       sizes: [...new Set(activeVariants.map((v) => v.size))],
       colours: [...new Set(activeVariants.map((v) => v.colour))],
-      in_stock: activeVariants.some((v) => v.stock_available > 0),
-      rating: rating ? Math.round((rating.sum / rating.count) * 10) / 10 : 0,
-      review_count: rating?.count ?? 0,
+      in_stock: activeVariants.some((v) => v.stock > 0),
       defaultVariantId: inStockVariant?.id ?? null,
     };
   });
@@ -81,7 +49,7 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductCardData[]>
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("products")
-    .select("*, category:categories(*)")
+    .select(PRODUCT_WITH_CATEGORY)
     .eq("is_active", true)
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
@@ -93,7 +61,7 @@ export async function getBestSellers(limit = 8): Promise<ProductCardData[]> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("products")
-    .select("*, category:categories(*)")
+    .select(PRODUCT_WITH_CATEGORY)
     .eq("is_active", true)
     .eq("is_best_seller", true)
     .order("created_at", { ascending: false })
@@ -105,7 +73,7 @@ export async function getNewArrivals(limit = 8): Promise<ProductCardData[]> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("products")
-    .select("*, category:categories(*)")
+    .select(PRODUCT_WITH_CATEGORY)
     .eq("is_active", true)
     .eq("is_new_arrival", true)
     .order("created_at", { ascending: false })
@@ -136,10 +104,7 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<{
   const page = filters.page ?? 1;
   const pageSize = filters.pageSize ?? 12;
 
-  let query = supabase
-    .from("products")
-    .select("*, category:categories(*)", { count: "exact" })
-    .eq("is_active", true);
+  let query = supabase.from("products").select(PRODUCT_WITH_CATEGORY, { count: "exact" }).eq("is_active", true);
 
   if (filters.categorySlug) {
     const { data: category } = await supabase
@@ -147,7 +112,13 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<{
       .select("id")
       .eq("slug", filters.categorySlug)
       .maybeSingle();
-    if (category) query = query.eq("category_id", category.id);
+    if (category) {
+      const { data: children } = await supabase.from("categories").select("id").eq("parent_id", category.id);
+      const categoryIds = [category.id, ...(children ?? []).map((c) => c.id)];
+      query = query.or(
+        `category_id.in.(${categoryIds.join(",")}),subcategory_id.in.(${categoryIds.join(",")})`
+      );
+    }
   }
   if (filters.gender) query = query.eq("gender", filters.gender);
   if (filters.minPrice !== undefined) query = query.gte("price", filters.minPrice);
@@ -170,6 +141,9 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<{
     case "best_selling":
       query = query.order("is_best_seller", { ascending: false });
       break;
+    case "top_rated":
+      query = query.order("rating", { ascending: false });
+      break;
     default:
       query = query.order("created_at", { ascending: false });
   }
@@ -189,28 +163,20 @@ export async function getProductBySlug(slug: string): Promise<ProductWithRelatio
   const supabase = await createServerSupabaseClient();
   const { data: product } = await supabase
     .from("products")
-    .select("*, category:categories(*)")
+    .select(PRODUCT_WITH_CATEGORY)
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
   if (!product) return null;
 
-  const [{ data: images }, { data: variants }] = await Promise.all([
-    supabase
-      .from("product_images")
-      .select("*")
-      .eq("product_id", product.id)
-      .order("display_order", { ascending: true }),
-    supabase
-      .from("product_variants")
-      .select("*")
-      .eq("product_id", product.id)
-      .eq("is_active", true),
-  ]);
+  const { data: variants } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", product.id)
+    .eq("is_active", true);
 
   return {
     ...(product as Product & { category: Category | null }),
-    images: (images as ProductImage[]) ?? [],
     variants: (variants as ProductVariant[]) ?? [],
   };
 }
@@ -218,11 +184,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithRelatio
 export async function getProductsByIds(ids: string[]): Promise<ProductCardData[]> {
   if (ids.length === 0) return [];
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("products")
-    .select("*, category:categories(*)")
-    .eq("is_active", true)
-    .in("id", ids);
+  const { data } = await supabase.from("products").select(PRODUCT_WITH_CATEGORY).eq("is_active", true).in("id", ids);
   const cards = await attachCardFields((data as (Product & { category: Category | null })[]) ?? []);
   const byId = new Map(cards.map((c) => [c.id, c]));
   return ids.map((id) => byId.get(id)).filter((c): c is ProductCardData => Boolean(c));
@@ -234,31 +196,14 @@ export async function getRelatedProducts(
   limit = 4
 ): Promise<ProductCardData[]> {
   const supabase = await createServerSupabaseClient();
-  let query = supabase
-    .from("products")
-    .select("*, category:categories(*)")
-    .eq("is_active", true)
-    .neq("id", excludeProductId)
-    .limit(limit);
+  let query = supabase.from("products").select(PRODUCT_WITH_CATEGORY).eq("is_active", true).neq("id", excludeProductId).limit(limit);
   if (categoryId) query = query.eq("category_id", categoryId);
   const { data } = await query;
   return attachCardFields((data as (Product & { category: Category | null })[]) ?? []);
 }
 
-export async function getSizeChart(
-  sizeChartId: string
-): Promise<{ chart: SizeChart; entries: SizeChartEntry[] } | null> {
+export async function getSizeChart(sizeChartKey: string): Promise<SizeChart | null> {
   const supabase = await createServerSupabaseClient();
-  const { data: chart } = await supabase
-    .from("size_charts")
-    .select("*")
-    .eq("id", sizeChartId)
-    .maybeSingle();
-  if (!chart) return null;
-  const { data: entries } = await supabase
-    .from("size_chart_entries")
-    .select("*")
-    .eq("size_chart_id", sizeChartId)
-    .order("display_order", { ascending: true });
-  return { chart: chart as SizeChart, entries: (entries as SizeChartEntry[]) ?? [] };
+  const { data: chart } = await supabase.from("size_charts").select("*").eq("key", sizeChartKey).maybeSingle();
+  return (chart as SizeChart) ?? null;
 }

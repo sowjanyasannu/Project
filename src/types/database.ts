@@ -78,78 +78,72 @@ export interface Category {
   name: string;
   slug: string;
   description: string | null;
+  short_description: string | null;
   image_url: string | null;
   display_order: number;
   is_active: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Product {
   id: string;
   category_id: string | null;
+  subcategory_id: string | null;
   name: string;
   slug: string;
-  sku: string;
-  description: string | null;
+  sku: string | null;
   short_description: string | null;
+  description: string | null;
+  images: string[];
+  video_url: string | null;
+  price: number;
+  mrp: number | null;
+  gst_percent: number;
   gender: ProductGender;
   age_group: string | null;
   fabric: string | null;
+  weight_grams: number | null;
   care_instructions: string | null;
-  price: number;
-  mrp: number | null;
-  gst_rate: number;
+  size_chart_key: string | null;
   tags: string[];
   is_featured: boolean;
   is_best_seller: boolean;
   is_new_arrival: boolean;
   is_active: boolean;
-  seo_title: string | null;
-  meta_description: string | null;
-  size_chart_id: string | null;
+  rating: number;
+  review_count: number;
   created_at: string;
   updated_at: string;
-}
-
-export interface ProductImage {
-  id: string;
-  product_id: string;
-  url: string;
-  alt_text: string | null;
-  display_order: number;
 }
 
 export interface ProductVariant {
   id: string;
   product_id: string;
   colour: string;
+  colour_hex: string | null;
   size: string;
-  sku: string;
-  price_override: number | null;
-  stock_available: number;
-  stock_reserved: number;
-  stock_sold: number;
+  sku: string | null;
+  price_adjustment: number;
+  stock: number;
   low_stock_threshold: number;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SizeChart {
   id: string;
-  garment_type: string;
-  name: string;
-}
-
-export interface SizeChartEntry {
-  id: string;
-  size_chart_id: string;
-  size_label: string;
-  measurements: Record<string, number>;
+  key: string;
+  title: string;
+  note: string | null;
+  columns: string[];
+  rows: Record<string, string>[];
   display_order: number;
 }
 
 export interface ProductWithRelations extends Product {
   category: Category | null;
-  images: ProductImage[];
   variants: ProductVariant[];
 }
 
